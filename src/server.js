@@ -1,4 +1,5 @@
 const net = require('net');
+const colors = require('colors');
 
 // Array of sockets (clients)
 var sockets = [];
