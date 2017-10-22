@@ -1,0 +1,10 @@
+{
+  "name": "OvertopTCPChatServer",
+  "version": "0.0.0",
+  "description": "TCP chat server",
+  "main": "./src/server.js",
+  "author": "Nico Greco",
+  "dependencies": {
+    "colors": "^1.1.2"
+  }
+}
