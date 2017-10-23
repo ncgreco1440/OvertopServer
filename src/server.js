@@ -7,20 +7,21 @@ var sockets = [];
 // New Socket callback
 function newSocket(socket) {
     socket.name = socket.remoteAddress + ":" + socket.remotePort;
-    socket.buff = "";
     sockets.push(socket);
-    socket.write('Welcome to the Telnet Server ' + socket.name + '!\r\n');
     socket.on('data', (data) => { recvData(socket, data); });
-    //socket.on('end', () => { closeSocket(socket); });
+    socket.on('error', () => { socket.destroy(); });
     socket.once('close', () => { closeSocket(socket); });
-    process.stdout.write(socket.name + ' has joined the chat server.\r\n');
+    for(var i = 0; i < sockets.length; i++) {
+        if(sockets[i] != socket) sockets[i].write(socket.name + '> has joined the chat server.\r\n');
+    }
+    process.stdout.write(socket.name + '> has joined the chat server.\r\n');
 };
 
 // Callback method execute when data is received from a socket
 function recvData(socket, d) {
     var cleanData = cleanInput(d);
     if(cleanData === '@quit') {
-        socket.end('Goodbye!\r\n');
+        socket.destroy();
     } else {
         for(var i = 0; i < sockets.length; i++) {
             if(sockets[i] != socket) sockets[i].write(socket.name + '> '+ d + '\r\n');
@@ -34,8 +35,8 @@ function closeSocket(socket) {
     var i = sockets.indexOf(socket);
     if(i != -1) {
         sockets.splice(i, 1);
-        sockets.every((sock) => { sock.write(socket.name+ ' has left the chat server.\r\n'); });
-        process.stdout.write(socket.name + ' has left the chat server.\r\n');
+        sockets.every((sock) => { sock.write(socket.name+ '> has left the chat server.\r\n'); });
+        process.stdout.write(socket.name + '> has left the chat server.\r\n');
     }
 };
 
@@ -43,8 +44,12 @@ function cleanInput(data) {
     return data.toString().replace(/(\r\n|\n|\r)/gm, "");
 };
 
+function serverStarted() {
+    process.stdout.write("Overtop TCP Server started!\r\n".green);
+};
+
 // TCP Server Creation
 var server = net.createServer(newSocket);
 
 // TCP Server Listen
-server.listen({host: 'localhost', port: 9000, exclusive: true});
+server.listen({host: 'localhost', port: 9000, exclusive: true}, serverStarted);
