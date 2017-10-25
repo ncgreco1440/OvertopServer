@@ -2,6 +2,7 @@ var config = require('../src/config');
 const eventCallbacks = require('../src/config/serverEventCallbacks.js');
 const assert = require('assert');
 const net = require('net');
+const socket = require('../src/socket');
 
 describe.only('TCP Socket', function() {
     config.setQuietMode(true);
@@ -38,6 +39,15 @@ describe.only('TCP Socket', function() {
                 done();
             });
             that.client.connect(9000, "127.0.0.1");
+        });
+
+        it('should add a new socket to the socket array', function(done) {
+            assert.equal(socket.numSockets(), 0);
+            that.client.connect(9000, "127.0.0.1");
+            setTimeout(function() {
+                assert.equal(socket.numSockets(), 1);
+                done();
+            }, 500);
         });
     });
 
