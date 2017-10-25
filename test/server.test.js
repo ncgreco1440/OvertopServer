@@ -193,5 +193,19 @@ describe.only('TCP Socket', function() {
                 that.client.write(that.jsonToString({"action": "unhandled", "arg": "Here be an arg[s]"}));
             }, 500);
         });
+
+        it('should respond with an \"unparseable command message\" if the command\'s action value was not a string', function(done) {
+            var str = InvalidCommandHelper.generateErrorMsgStr(config.Error.cmd_unparseable);
+
+            that.client.on('data', function(d) {
+                if(d.toString('utf8') === str) {
+                    assert.equal(true, true);
+                    done();
+                }
+            });
+            setTimeout(function() {
+                that.client.write(that.jsonToString({"action": {"hahah": "hacked"}, "arg": "Here be an arg[s]"}));
+            }, 500);
+        });
     });
 });

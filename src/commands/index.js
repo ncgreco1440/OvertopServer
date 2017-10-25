@@ -23,25 +23,31 @@ module.exports = {
         }
     },
     cleanCommand: function(command) {
+        var cmd = {};
+
         if(!command.hasOwnProperty('action') || !command.hasOwnProperty('arg'))
             throw config.Error.cmd_misunderstood;
 
-        JSON.stringify(command.action, function(k, v) { 
-            if(typeof v != 'string') 
+        try {
+            JSON.stringify(command.action, function(k, v) { 
+                if(typeof v === 'string') 
+                    return v; 
                 return undefined; 
-            return v; 
-        });
+            });
 
-        JSON.stringify(command.arg, function(k, v) { 
-            if(typeof v != 'string') 
+            JSON.stringify(command.arg, function(k, v) { 
+                if(typeof v === 'string') 
+                    return v; 
                 return undefined; 
-            return v; 
-        });
+            });
 
-        return {
-            action: command.action.toLowerCase().trim(),
-            arg: command.arg.toLowerCase().trim()
-        };
+            cmd.action = command.action.toLowerCase().trim();
+            cmd.arg = command.arg;
+        }catch(e) {
+            throw config.Error.cmd_unparseable;
+        }
+        
+        return cmd;
     },
     processCommand: function(command) {
         if(eligibleActions.indexOf(command.action) == -1)
