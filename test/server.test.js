@@ -51,6 +51,20 @@ describe.only('TCP Socket', function() {
         });
     });
 
+    describe('when disconnecting from the server', function() {
+        it('should remove the socket from the sockets array', function(done) {
+            assert.equal(socket.numSockets(), 0);
+            that.client.connect(9000, "127.0.0.1");
+            setTimeout(function() {
+                that.client.destroy();
+                setTimeout(function() {
+                    assert.equal(socket.numSockets(), 0);
+                    done();
+                }, 250);
+            }, 500);
+        });
+    });
+
     describe('when sending valid commands to the server', function() {
         beforeEach(function() {
             that.autoConnect();
