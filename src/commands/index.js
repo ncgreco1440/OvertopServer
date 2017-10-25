@@ -4,7 +4,8 @@ var eligibleActions = [
     "login",
     "join_room",
     "message",
-    "logout"
+    "logout",
+    "unhandled"
 ];
 
 module.exports = {
@@ -14,14 +15,16 @@ module.exports = {
             attemptedParse = JSON.parse(data.toString('utf8'));
             return attemptedParse;
         }catch(e) {
-            console.log(e);
-            console.log(config.Error.cmd_unparseable);
-            return false;
+            if(!config.isQuiet()) {
+                console.log(e);
+                console.log(config.Error.cmd_unparseable);
+            }
+            throw config.Error.cmd_unparseable;
         }
     },
     cleanCommand: function(command) {
         if(!command.hasOwnProperty('action') || !command.hasOwnProperty('arg'))
-            return false;
+            throw config.Error.cmd_misunderstood;
 
         JSON.stringify(command.action, function(k, v) { 
             if(typeof v != 'string') 
@@ -42,27 +45,27 @@ module.exports = {
     },
     processCommand: function(command) {
         if(eligibleActions.indexOf(command.action) == -1)
-            throw(config.Error.cmd_action_invalid);
+            throw config.Error.cmd_action_invalid;
         switch(command.action)
         {
             case "login": {
-                console.log("Logging in...");
+                //console.log("Logging in...");
                 break;
             }
             case "message": {
-                console.log("Sending a message...");
+                //console.log("Sending a message...");
                 break;
             }
             case "join_room": {
-                console.log("Joining room...");
+                //console.log("Joining room...");
                 break;
             }
             case "logout": {
-                console.log("Logging out...");
+                //console.log("Logging out...");
                 break;
             }
             default: {
-                throw(config.Error.cmd_action_unhandled);
+                throw config.Error.cmd_action_unhandled;
                 break;
             }
         }

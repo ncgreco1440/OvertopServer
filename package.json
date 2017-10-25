@@ -4,7 +4,13 @@
   "description": "TCP chat server",
   "main": "./src/server.js",
   "author": "Nico Greco",
+  "scripts": {
+    "test": "mocha"
+  },
   "dependencies": {
     "colors": "^1.1.2"
+  },
+  "devDependencies": {
+    "mocha": "^4.0.1"
   }
 }

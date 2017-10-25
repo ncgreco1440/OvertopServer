@@ -1,4 +1,5 @@
 const commands = require('../commands');
+const config = require('../config');
 
 // Array of all sockets
 var sockets = [];
@@ -12,12 +13,17 @@ function receiveData(socket, d) {
     if(cleanData === '@quit') {
         socket.destroy();
     } else {
-        var cmd = commands.parseDataIntoCommand(d);
-        if(cmd) {
-            try {
-                cmd = commands.cleanCommand(cmd);
-                commands.processCommand(cmd);
-            }catch(e) {
+        try {
+            var cmd = commands.parseDataIntoCommand(d);
+            cmd = commands.cleanCommand(cmd);
+            commands.processCommand(cmd);
+            socket.write(config.Response.successCmd);
+        }catch(e) {
+            var res = config.Response.failCmd;
+            res.msg = e;
+            var str = JSON.stringify(res);
+            socket.write(str);
+            if(!config.isQuiet()) {
                 console.log(e);
             }
         }
@@ -32,8 +38,10 @@ function closeSocket(socket) {
     var i = sockets.indexOf(socket);
     if(i != -1) {
         sockets.splice(i, 1);
-        sockets.every((sock) => { sock.write(socket.name+ '> has left the chat server.\r\n'); });
-        process.stdout.write(socket.name + '> has left the chat server.\r\n');
+        if(!config.isQuiet()) {
+            sockets.every((sock) => { sock.write(socket.name+ '> has left the chat server.\r\n'); });
+            process.stdout.write(socket.name + '> has left the chat server.\r\n');
+        }
     }
 };
 
@@ -44,9 +52,17 @@ module.exports = {
         socket.on('data', (data) => { receiveData(socket, data); });
         socket.on('error', () => { socket.destroy(); });
         socket.once('close', () => { closeSocket(socket); });
+        socket.write(config.Response.welcome);
         for(var i = 0; i < sockets.length; i++) {
-            if(sockets[i] != socket) sockets[i].write(socket.name + '> has joined the chat server.\r\n');
+            if(sockets[i] != socket) {
+                sockets[i].write(socket.name + '> has joined the chat server.\r\n');
+            }
         }
-        process.stdout.write(socket.name + '> has joined the chat server.\r\n'); // Server Log
+        if(!config.isQuiet()) {
+            process.stdout.write(socket.name + '> has joined the chat server.\r\n'); // Server Log
+        }
+    },
+    numSockets: function() {
+        return sockets.length;
     }
 };
