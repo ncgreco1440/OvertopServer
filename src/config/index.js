@@ -1,4 +1,5 @@
 const fs = require('fs');
+const colors = require('colors');
 
 module.exports = {
     OvertopServer: function() {
@@ -31,7 +32,16 @@ module.exports = {
             },
             portNumber: function() {
                 return dataFields.port;
+            },
+            serverStarted: function() {
+                console.log("Overtop TCP Server started!\r\n".green);
             }
         };
+    },
+    Error: {
+        cmd_unparseable: "Command could not be parsed from the client.",
+        cmd_action_invalid: "Command action was invalid.",
+        cmd_arg_invalid: "Command argument was invalid.",
+        cmd_action_unhandled: "Command action is not handled."
     }
 };
